@@ -1,4 +1,4 @@
-A library for Dart developers.
+Library to authenticate users with Steam OpenID and functions to call steam WebAPI.
 
 ## Get Started
 
