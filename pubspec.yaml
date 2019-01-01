@@ -1,5 +1,5 @@
 name: steam_login
-description: Library to authenticate usess with Steam OpenID
+description: Library to authenticate users with Steam OpenID
 version: 1.0.0
 homepage: https://github.com/Hexer10/steam_login
 author: Mattia <hexer504@gmail.com>
