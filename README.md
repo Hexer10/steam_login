@@ -22,3 +22,6 @@ See `example/steam_login_example.dart` for a full example!
 Please file feature requests and bugs at the [issue tracker][tracker].
 
 [tracker]: https://github.com/Hexer10/steam_login/issues
+
+
+This is heavily based on [steam_go](https://github.com/solovev/steam_go).
