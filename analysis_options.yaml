@@ -70,7 +70,6 @@ linter:
   - prefer_contains
   - prefer_const_declarations
   - prefer_collection_literals
-  - prefer_bool_in_asserts
   - prefer_adjacent_string_concatenation
   - parameter_assignments
   - package_prefixed_library_names
