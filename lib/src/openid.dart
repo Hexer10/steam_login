@@ -58,7 +58,7 @@ class OpenId {
 
   /// Must be called only when mode is 'id_res' or an [OpenIdException] will be thrown.
   /// Validates the authentication and return a [Future] string with the user's steamid64.
-  Future<String?> validate() async {
+  Future<String> validate() async {
     if (mode != 'id_res') {
       throw OpenIdException(
           OpenIdFailReason.param, 'must be equal to "id_res".', 'openid.mode');
@@ -104,7 +104,7 @@ class OpenId {
           OpenIdFailReason.pattern, 'Invalid steam id pattern');
     }
 
-    return _validation_regexp.firstMatch(openIdUrl)!.group(1);
+    return _validation_regexp.firstMatch(openIdUrl)!.group(1)!;
   }
 
   /// Current [mode] (or an empty string if no mode is set).
