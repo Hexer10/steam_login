@@ -16,9 +16,9 @@ class OpenId {
   final RegExp _validation_regexp =
       RegExp(r'^https://steamcommunity.com/openid/id/(7[0-9]{15,25})$');
 
-  String? _host;
-  String? _returnUrl;
-  late Map<String, String> _data;
+  late final String _host;
+  late final String _returnUrl;
+  late final Map<String, String> _data;
 
   /// [OpenId] constructor, requires the current [HttpRequest],
   /// The [_host] and [_returnUrl] are taken from the [HttpRequest.requestedUri],
@@ -40,7 +40,7 @@ class OpenId {
       'openid.return_to': _returnUrl
     };
 
-    Uri uri = _host!.startsWith('https')
+    Uri uri = _host.startsWith('https')
         ? Uri.https('steamcommunity.com', '/openid/login', data)
         : Uri.http('steamcommunity.com', '/openid/login', data);
     return uri;
@@ -48,7 +48,7 @@ class OpenId {
 
   /// Must be called only when mode is 'id_res' or an [OpenIdException] will be thrown.
   /// Validates the authentication and return a [Future] string with the user's steamid64.
-  Future<String?> validate() async {
+  Future<String> validate() async {
     if (mode != 'id_res') {
       throw OpenIdException(
           OpenIdFailReason.param, 'must be equal to "id_res".', 'openid.mode');
@@ -94,14 +94,14 @@ class OpenId {
           OpenIdFailReason.pattern, 'Invalid steam id pattern');
     }
 
-    return _validation_regexp.firstMatch(openIdUrl)!.group(1);
+    return _validation_regexp.firstMatch(openIdUrl)!.group(1)!;
   }
 
   /// Current [host].
-  String? get host => _host;
+  String get host => _host;
 
   /// Current [returnUrl]
-  String? get returnUrl => _returnUrl;
+  String get returnUrl => _returnUrl;
 
   /// Current [mode] (or an empty string if no mode is set).
   String get mode => _data['openid.mode'] ?? '';

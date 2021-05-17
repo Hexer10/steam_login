@@ -8,7 +8,7 @@ import 'exceptions.dart';
 /// Listed on https://developer.valvesoftware.com/wiki/Steam_Web_API#GetPlayerSummaries_.28v0002.29
 /// Throws a Generic
 Future<Map<String, dynamic>> GetPlayerSummaries(
-    String? steamid, String apikey) async {
+    String steamid, String apikey) async {
   final url =
       'http://api.steampowered.com/ISteamUser/GetPlayerSummaries/v0002/?key=$apikey&steamids=$steamid';
   var resp = await http.get(Uri.parse(url));
