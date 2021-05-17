@@ -58,7 +58,7 @@ class OpenId {
 
   /// Must be called only when mode is 'id_res' or an [OpenIdException] will be thrown.
   /// Validates the authentication and return a [Future] string with the user's steamid64.
-  Future<String> validate() async {
+  Future<String?> validate() async {
     if (mode != 'id_res') {
       throw OpenIdException(
           OpenIdFailReason.param, 'must be equal to "id_res".', 'openid.mode');
@@ -69,7 +69,7 @@ class OpenId {
           'must match the url of the current request.', 'openid.return_to');
     }
 
-    Map<String, String> params = {
+    Map<String, String?> params = {
       'openid.assoc_handle': data['openid.assoc_handle'],
       'openid.signed': data['openid.signed'],
       'openid.sig': data['openid.sig'],
@@ -80,16 +80,13 @@ class OpenId {
       throw OpenIdException(OpenIdFailReason.params, 'Invalid OpenID params!');
     }
 
-    List<String> split = data['openid.signed'].split(',');
+    List<String> split = data['openid.signed']!.split(',');
     for (var part in split) {
       params['openid.$part'] = data['openid.$part'];
     }
     params['openid.mode'] = 'check_authentication';
 
-    var resp = await http.post(_steam_login, body: params);
-    if (resp.body == null) {
-      throw OpenIdException(OpenIdFailReason.noBody, 'Empty response body!');
-    }
+    var resp = await http.post(Uri.parse(_steam_login), body: params);
 
     split = resp.body.split('\n');
     if (split[0] != 'ns:$_openId_ns')
@@ -101,13 +98,13 @@ class OpenId {
           OpenIdFailReason.invalid, 'Unable to validate openId');
     }
 
-    var openIdUrl = data['openid.claimed_id'];
+    var openIdUrl = data['openid.claimed_id']!;
     if (!_validation_regexp.hasMatch(openIdUrl)) {
       throw OpenIdException(
           OpenIdFailReason.pattern, 'Invalid steam id pattern');
     }
 
-    return _validation_regexp.firstMatch(openIdUrl).group(1);
+    return _validation_regexp.firstMatch(openIdUrl)!.group(1);
   }
 
   /// Current [mode] (or an empty string if no mode is set).

@@ -4,7 +4,7 @@ enum OpenIdFailReason { param, params, body, noBody, pattern, invalid }
 
 class OpenIdException implements Exception {
   final String message;
-  final String param;
+  final String? param;
   final OpenIdFailReason reason;
 
   OpenIdException(this.reason, [this.message = '', this.param]);
