@@ -3,6 +3,7 @@ library steam_login.openid;
 import 'dart:io';
 
 import 'package:http/http.dart' as http;
+
 import 'exceptions.dart';
 
 class OpenId {
@@ -16,18 +17,27 @@ class OpenId {
   final RegExp _validation_regexp =
       RegExp(r'^https://steamcommunity.com/openid/id/(7[0-9]{15,25})$');
 
-  late final String _host;
-  late final String _returnUrl;
-  late final Map<String, String> _data;
+  final String host;
+  final String returnUrl;
+  final Map<String, String> data;
 
   /// [OpenId] constructor, requires the current [HttpRequest],
-  /// The [_host] and [_returnUrl] are taken from the [HttpRequest.requestedUri],
-  /// [_returnUrl] is usually the current URL.
-  OpenId(HttpRequest request) {
-    _host = '${request.requestedUri.scheme}://${request.requestedUri.host}';
-    _returnUrl = '$_host${request.requestedUri.path}';
-    _data = request.uri.queryParameters;
-  }
+  /// The [host] and [returnUrl] are taken from the [HttpRequest.requestedUri],
+  /// [returnUrl] is usually the current URL.
+  OpenId(HttpRequest request)
+      : host = '${request.requestedUri.scheme}://${request.requestedUri.host}',
+        returnUrl =
+            '${request.requestedUri.scheme}://${request.requestedUri.host}${request.requestedUri.path}',
+        data = request.uri.queryParameters;
+
+  /// Manually instances an [OpenId]
+  OpenId.raw(this.host, this.returnUrl, this.data);
+
+
+  OpenId.fromUri(Uri uri)
+      : host = '${uri.scheme}://${uri.host}',
+        returnUrl = '${uri.scheme}://${uri.host}${uri.path}',
+        data = uri.queryParameters;
 
   /// Return the authUrl
   Uri authUrl() {
@@ -36,11 +46,11 @@ class OpenId {
       'openid.identity': _openId_identifier,
       'openid.mode': _openId_mode,
       'openid.ns': _openId_ns,
-      'openid.realm': _host,
-      'openid.return_to': _returnUrl
+      'openid.realm': host,
+      'openid.return_to': returnUrl
     };
 
-    Uri uri = _host.startsWith('https')
+    Uri uri = host.startsWith('https')
         ? Uri.https('steamcommunity.com', '/openid/login', data)
         : Uri.http('steamcommunity.com', '/openid/login', data);
     return uri;
@@ -54,29 +64,32 @@ class OpenId {
           OpenIdFailReason.param, 'must be equal to "id_res".', 'openid.mode');
     }
 
-    if (_data['openid.return_to'] != _returnUrl) {
+    if (data['openid.return_to'] != returnUrl) {
       throw OpenIdException(OpenIdFailReason.param,
           'must match the url of the current request.', 'openid.return_to');
     }
 
-    Map<String, String?> params = {
-      'openid.assoc_handle': _data['openid.assoc_handle'],
-      'openid.signed': _data['openid.signed'],
-      'openid.sig': _data['openid.sig'],
-      'openid.ns': _data['openid.ns']
+    Map<String, String> params = {
+      'openid.assoc_handle': data['openid.assoc_handle'],
+      'openid.signed': data['openid.signed'],
+      'openid.sig': data['openid.sig'],
+      'openid.ns': data['openid.ns']
     };
 
-    if (params.containsValue(null) || _data['openid.signed'] == null) {
+    if (params.containsValue(null) || data['openid.signed'] == null) {
       throw OpenIdException(OpenIdFailReason.params, 'Invalid OpenID params!');
     }
 
-    List<String> split = _data['openid.signed']!.split(',');
+    List<String> split = data['openid.signed'].split(',');
     for (var part in split) {
-      params['openid.$part'] = _data['openid.$part'];
+      params['openid.$part'] = data['openid.$part'];
     }
     params['openid.mode'] = 'check_authentication';
 
-    var resp = await http.post(Uri.parse(_steam_login), body: params);
+    var resp = await http.post(_steam_login, body: params);
+    if (resp.body == null) {
+      throw OpenIdException(OpenIdFailReason.noBody, 'Empty response body!');
+    }
 
     split = resp.body.split('\n');
     if (split[0] != 'ns:$_openId_ns')
@@ -88,21 +101,15 @@ class OpenId {
           OpenIdFailReason.invalid, 'Unable to validate openId');
     }
 
-    var openIdUrl = _data['openid.claimed_id']!;
+    var openIdUrl = data['openid.claimed_id'];
     if (!_validation_regexp.hasMatch(openIdUrl)) {
       throw OpenIdException(
           OpenIdFailReason.pattern, 'Invalid steam id pattern');
     }
 
-    return _validation_regexp.firstMatch(openIdUrl)!.group(1)!;
+    return _validation_regexp.firstMatch(openIdUrl).group(1);
   }
 
-  /// Current [host].
-  String get host => _host;
-
-  /// Current [returnUrl]
-  String get returnUrl => _returnUrl;
-
   /// Current [mode] (or an empty string if no mode is set).
-  String get mode => _data['openid.mode'] ?? '';
+  String get mode => data['openid.mode'] ?? '';
 }

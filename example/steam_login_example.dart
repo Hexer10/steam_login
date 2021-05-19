@@ -13,6 +13,7 @@ Future<void> main() async {
   server.listen((request) async {
     //Check if the path is '/login'
     if (request.uri.path == '/login') {
+
       // Create OpenId instance with the current request.
       OpenId openId = OpenId(request);
 
@@ -27,7 +28,7 @@ Future<void> main() async {
               ..close();
             break;
           }
-        // Authentication failed/cancelled.
+          // Authentication failed/cancelled.
         case 'cancel':
           {
             request.response
@@ -35,11 +36,11 @@ Future<void> main() async {
               ..close();
             break;
           }
-        // Usually mode = 'id_res'.
+          // Usually mode = 'id_res'.
         default:
           {
             // Validate the authentication and the the steamid64.
-            String? steamId = await openId.validate();
+            String steamId = await openId.validate();
 
             // Save the steamid into the session.
             request.session['steamid'] = steamId;
@@ -57,10 +58,9 @@ Future<void> main() async {
       } else {
         // If he's logged in display his steam display name.
         // Get the steamapi key here: https://steamcommunity.com/dev/apikey
-        Map<String, dynamic>? summaries = await GetPlayerSummaries(
-            request.session['steamid'], 'yoursteamapikey');
-        request.response
-            .write('Thanks for logging in: ${summaries['personname']}');
+        Map<String, dynamic> summaries = await GetPlayerSummaries(request.session['steamid'], 'yoursteamapikey');
+        request.response.write(
+            'Thanks for logging in: ${summaries['personaname']}');
       }
       request.response.close();
     }
