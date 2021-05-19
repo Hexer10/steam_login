@@ -1,6 +1,6 @@
 name: steam_login
 description: Library to authenticate users with Steam OpenID and functions to call steam WebAPI.
-version: 1.0.3
+version: 1.0.4
 homepage: https://github.com/Hexer10/steam_login
 author: Mattia <hexer504@gmail.com>
 

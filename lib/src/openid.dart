@@ -9,12 +9,12 @@ import 'exceptions.dart';
 class OpenId {
   final _steam_login = 'https://steamcommunity.com/openid/login';
 
-  final _openId_mode = 'checkid_setup';
-  final _openId_ns = 'http://specs.openid.net/auth/2.0';
-  final _openId_identifier =
+  static const _openIdMode = 'checkid_setup';
+  static const _openIdNs = 'http://specs.openid.net/auth/2.0';
+  static const _openIdIdentifier =
       'http://specs.openid.net/auth/2.0/identifier_select';
 
-  final RegExp _validation_regexp =
+  static final RegExp _validation_regexp =
       RegExp(r'^https://steamcommunity.com/openid/id/(7[0-9]{15,25})$');
 
   final String host;
@@ -33,7 +33,6 @@ class OpenId {
   /// Manually instances an [OpenId]
   OpenId.raw(this.host, this.returnUrl, this.data);
 
-
   OpenId.fromUri(Uri uri)
       : host = '${uri.scheme}://${uri.host}',
         returnUrl = '${uri.scheme}://${uri.host}${uri.path}',
@@ -42,10 +41,10 @@ class OpenId {
   /// Return the authUrl
   Uri authUrl() {
     final data = {
-      'openid.claimed_id': _openId_identifier,
-      'openid.identity': _openId_identifier,
-      'openid.mode': _openId_mode,
-      'openid.ns': _openId_ns,
+      'openid.claimed_id': _openIdIdentifier,
+      'openid.identity': _openIdIdentifier,
+      'openid.mode': _openIdMode,
+      'openid.ns': _openIdNs,
       'openid.realm': host,
       'openid.return_to': returnUrl
     };
@@ -89,7 +88,7 @@ class OpenId {
     var resp = await http.post(Uri.parse(_steam_login), body: params);
 
     split = resp.body.split('\n');
-    if (split[0] != 'ns:$_openId_ns')
+    if (split[0] != 'ns:$_openIdNs')
       throw OpenIdException(
           OpenIdFailReason.invalid, 'Wrong ns in the response');
 

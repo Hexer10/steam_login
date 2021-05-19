@@ -10,7 +10,7 @@ import 'exceptions.dart';
 Future<Map<String, dynamic>> GetPlayerSummaries(
     String steamid, String apikey) async {
   final url =
-      'http://api.steampowered.com/ISteamUser/GetPlayerSummaries/v0002/?key=$apikey&steamids=$steamid';
+      'https://api.steampowered.com/ISteamUser/GetPlayerSummaries/v0002/?key=$apikey&steamids=$steamid';
   var resp = await http.get(Uri.parse(url));
   if (resp.statusCode == 403) {
     throw ApiKeyException(apikey);
